@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -31,18 +32,18 @@ public class StorageController {
 
     private final StorageService storageService;
 
+    @GetMapping
+    public ResponseEntity<List<StorageResponse>> getAllStorages() {
+        List<StorageResponse> storages = storageService.getAllStorages();
+        return ResponseEntity.ok(storages);
+    }
+
     @PostMapping
     public ResponseEntity<StorageResponse> createStorage(@RequestBody @Valid StorageRequest request) {
         Integer storageId = storageService.createStorage(request);
         StorageResponse response = StorageResponse.builder()
             .id(storageId).build();
         return new ResponseEntity<>(response, HttpStatus.CREATED);
-    }
-
-    @GetMapping
-    public ResponseEntity<List<StorageResponse>> getAllStorages() {
-        List<StorageResponse> storages = storageService.getAllStorages();
-        return ResponseEntity.ok(storages);
     }
 
     @DeleteMapping
@@ -55,4 +56,15 @@ public class StorageController {
         return ResponseEntity.ok(deletedStorages);
     }
 
+    @GetMapping("/test")
+    public String testEndpointForUser(Principal principal) {
+        String name = principal.getName();
+        System.out.println("Accepted for principal with name:" + name);
+        return name;
+    }
+
+    @GetMapping("/test2")
+    public String testEndpointForUser2() {
+        return "TEST";
+    }
 }

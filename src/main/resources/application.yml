@@ -1,5 +1,5 @@
 server:
-  port : 8083
+  port: 8083
 
 spring:
   datasource:
@@ -11,6 +11,18 @@ spring:
     spring.jpa.database-platform: org.hibernate.dialect.H2Dialect
   application:
     name: storage-service
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://keycloak:8080/auth/realms/SpringBootKeycloak
+          jwk-set-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
+
+jwt:
+  auth:
+    converter:
+      resource-id: springboot-keycloak-client
+      principal-attribute: preferred_username
 
 eureka:
   client.serviceUrl.defaultZone: http://localhost:8761/eureka/

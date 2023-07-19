@@ -1,0 +1,83 @@
+version: '3.7'
+
+services:
+  ms-storage-app:
+    container_name: ms-storage-app
+    image: ms-storage
+    ports:
+      - "8083:8083"
+    depends_on:
+      - keycloak
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-server:8761/eureka/
+    networks:
+      - global_network
+
+  eureka-server-app:
+    container_name: eureka-server
+    image: eureka-server
+    restart: always
+    ports:
+      - "8761:8761"
+    networks:
+      - global_network
+
+  #  keycloak:
+  #    container_name: keycloak
+  #    image: jboss/keycloak
+  #    environment:
+  #      - KEYCLOAK_USER=admin
+  #      - KEYCLOAK_PASSWORD=admin
+  #    ports:
+  #      - "8090:8090"
+  #    networks:
+  #      - microservices_network
+
+  keycloak:
+    container_name: keycloak
+    image: jboss/keycloak
+    restart: on-failure
+    command:
+      - "-b"
+      - "0.0.0.0"
+      - "-Dkeycloak.migration.action=import"
+      - "-Dkeycloak.migration.provider=dir"
+      - "-Dkeycloak.migration.dir=/config/"
+      - "-Dkeycloak.migration.strategy=IGNORE_EXISTING"
+    volumes:
+      - ./config:/config/
+    environment:
+      - KEYCLOAK_USER=admin
+      - KEYCLOAK_PASSWORD=password
+      - DB_VENDOR=postgres
+      - DB_USER=admin
+      - DB_PASSWORD=password
+      - DB_ADDR=keycloak-db
+      - DB_PORT=5432
+      - DB_DATABASE=keycloakdb
+    ports:
+      - "8099:8080"
+    depends_on:
+      - keycloak-db
+    networks:
+      - global_network
+
+
+  keycloak-db:
+    image: postgres:10
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: keycloakdb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - global_network
+
+
+volumes:
+  pgdata:
+
+networks:
+  global_network:
+    driver: bridge
